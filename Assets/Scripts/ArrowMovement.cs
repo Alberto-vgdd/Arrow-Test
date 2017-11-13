@@ -35,7 +35,6 @@ public class ArrowMovement : MonoBehaviour
 	private Vector3 m_MousePositionInWorldCoordinates;
 
 
-
 	void Awake() 
 	{
 		m_DefaultBodyLength = m_ArrowBodyTransform.GetComponent<BoxCollider2D>().size.y;
@@ -48,8 +47,12 @@ public class ArrowMovement : MonoBehaviour
 
 	void Update ()
 	{
+		ThrowArrow();
 		TurnArrow();
-		ScaleArrow();
+		TenseArrow();
+		
+
+		Debug.DrawLine(m_ArrowTransform.position,m_ArrowTransform.position+m_ArrowTransform.up*10f,Color.green);
 	}
 
 
@@ -64,7 +67,7 @@ public class ArrowMovement : MonoBehaviour
 
 	}
 
-	void ScaleArrow()
+	void TenseArrow()
 	{
 		if (Input.GetMouseButton(0))
 		{
@@ -80,5 +83,20 @@ public class ArrowMovement : MonoBehaviour
 		// Scale the arrow.
 		m_ArrowBodyTransform.localScale = new Vector3(1f,Mathf.SmoothDamp(m_ArrowBodyTransform.localScale.y,m_TargetBodyScale,ref m_BodyScaleVelocity,m_ScaleTime),1f); 
 		m_ArrowTipTransform.localPosition = Vector3.up*( m_ArrowBodyTransform.localPosition.y+m_ArrowBodyTransform.localScale.y*m_DefaultBodyLength);
+	}
+
+	void ThrowArrow()
+	{
+		if (Input.GetMouseButtonUp(0))
+		{
+			RaycastHit2D hit = Physics2D.Raycast(m_ArrowTransform.position,m_ArrowTransform.up,20f,(1 << LayerMask.NameToLayer("Walls")));
+			
+			if (hit.collider.gameObject != null)
+			{
+				m_ArrowTransform.position = hit.point + hit.normal*0.1f;
+				m_ArrowTransform.up = hit.normal;
+				m_TargetArrowUp = hit.normal; m_TargetArrowUp.z = 0;
+			}
+		}
 	}
 }
